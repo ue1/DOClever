@@ -503,6 +503,26 @@ var interface=[
         user:1,
         handle:[project.validateUser,project.updateSwagger]
     },
+    // sync
+    {
+        "method": "PUT",
+        "path": "/project/syncswagger",
+        "param": {
+            id: String,
+            json: {
+                type: String,
+                optional: 1
+            },
+            url: {
+                type: String,
+                optional: 1
+            }
+        },
+        "data": {
+        },
+        user: 1,
+        handle: [project.syncSwagger]
+    },
     {
         "method":"POST",
         "path":"/project/importpostman",

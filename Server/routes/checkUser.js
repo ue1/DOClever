@@ -20,6 +20,11 @@ router.use(async function(req,res,next)
     }
     try
     {
+        // sync
+        if (req.headers && req.baseUrl == "/project" && req.path == "/syncswagger" && con.token == req.headers['token'] && req.handle) {
+            return req.handle[0](req, res);
+        }
+
         let userId;
         if(req.session.userid)
         {
