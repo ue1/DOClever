@@ -1,507 +1,506 @@
-/**
- * Created by sunxin on 2016/11/16.
- */
-var projectClass=require("./project");
-var project=new projectClass();
-var interface=[
+var projectClass = require("./project");
+var syncClass = require("./sync");
+var project = new projectClass();
+var sync = new syncClass();
+var interface = [
     {
-        "method":"POST",
-        "path":"/project/create",
+        "method": "POST",
+        "path": "/project/create",
         "param": {
-            name:{
-                type:String
+            name: {
+                type: String
             },
-            dis:{
-                optional:1,
-                type:String
+            dis: {
+                optional: 1,
+                type: String
             },
-            id:{
-                optional:1,
-                type:String
+            id: {
+                optional: 1,
+                type: String
             },
-            import:{
-                type:Number,
-                optional:1
+            import: {
+                type: Number,
+                optional: 1
             },
-            team:{
-                optional:1,
-                type:String
+            team: {
+                optional: 1,
+                type: String
             },
-            public:{
-                type:Number,
-                optional:1
+            public: {
+                type: Number,
+                optional: 1
             }
         },
-        "data":String,
-        user:1,
-        handle:[project.validateUser,project.create]
+        "data": String,
+        user: 1,
+        handle: [project.validateUser, project.create]
     },
     {
-        "method":"POST",
-        "path":"/project/member",
+        "method": "POST",
+        "path": "/project/member",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            user:{
-                type:String
+            user: {
+                type: String
             },
-            role:{
-                type:Number,
-                validate:{
-                    in:[0,1]
+            role: {
+                type: Number,
+                validate: {
+                    in: [0, 1]
                 }
             },
-            option:{
-                type:String,
-                optional:1
+            option: {
+                type: String,
+                optional: 1
             }
         },
-        "data":String,
-        user:1,
-        handle:[project.validateUser,project.addMember]
+        "data": String,
+        user: 1,
+        handle: [project.validateUser, project.addMember]
     },
     {
-        "method":"PUT",
-        "path":"/project/role",
+        "method": "PUT",
+        "path": "/project/role",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            user:{
-                type:String
+            user: {
+                type: String
             },
-            role:{
-                type:Number,
-                validate:{
-                    in:[0,1]
+            role: {
+                type: Number,
+                validate: {
+                    in: [0, 1]
                 }
             },
-            option:{
-                type:String,
-                optional:1
+            option: {
+                type: String,
+                optional: 1
             }
         },
-        "data":String,
-        user:1,
-        handle:[project.validateUser,project.role]
+        "data": String,
+        user: 1,
+        handle: [project.validateUser, project.role]
     },
     {
-        "method":"DELETE",
-        "path":"/project/member",
+        "method": "DELETE",
+        "path": "/project/member",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            user:{
-                type:String
+            user: {
+                type: String
             },
         },
-        "data":String,
-        user:1,
-        handle:[project.validateUser,project.removeMember]
+        "data": String,
+        user: 1,
+        handle: [project.validateUser, project.removeMember]
     },
     {
-        "method":"GET",
-        "path":"/project/list",
+        "method": "GET",
+        "path": "/project/list",
         "param": {
 
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.list]
+        user: 1,
+        handle: [project.list]
     },
     {
-        "method":"GET",
-        "path":"/project/filterlist",
+        "method": "GET",
+        "path": "/project/filterlist",
         "param": {
-            team:{
-                type:String,
-                optional:1
+            team: {
+                type: String,
+                optional: 1
             },
-            name:{
-                type:String,
-                optional:1
+            name: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.filterList]
+        user: 1,
+        handle: [project.filterList]
     },
     {
-        "method":"PUT",
-        "path":"/project/url",
+        "method": "PUT",
+        "path": "/project/url",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            urls:{
-                type:String,
-                optional:1
+            urls: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.url]
+        user: 1,
+        handle: [project.inProject, project.url]
     },
     {
-        "method":"GET",
-        "path":"/project/info",
+        "method": "GET",
+        "path": "/project/info",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.info]
+        user: 1,
+        handle: [project.inProject, project.info]
     },
     {
-        "method":"GET",
-        "path":"/project/group",
+        "method": "GET",
+        "path": "/project/group",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.groupList]
+        user: 1,
+        handle: [project.inProject, project.groupList]
     },
     {
-        "method":"GET",
-        "path":"/project/interface",
+        "method": "GET",
+        "path": "/project/interface",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            group:{            //group存在获取group下的接口，不存在获取未分组的接口
-                type:String,
-                optional:1
+            group: {            //group存在获取group下的接口，不存在获取未分组的接口
+                type: String,
+                optional: 1
             },
-            sort:{
-                type:Number,   //不存在或者为0 名称  1 修改时间 2 自定义
-                optional:1
+            sort: {
+                type: Number,   //不存在或者为0 名称  1 修改时间 2 自定义
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.interfaceList]
+        user: 1,
+        handle: [project.inProject, project.interfaceList]
     },
     {
-        "method":"DELETE",
-        "path":"/project/clear",
+        "method": "DELETE",
+        "path": "/project/clear",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.validateUser,project.clear]
+        user: 1,
+        handle: [project.validateUser, project.clear]
     },
     {
-        "method":"DELETE",
-        "path":"/project/item",
+        "method": "DELETE",
+        "path": "/project/item",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.validateUser,project.removeProject]
+        user: 1,
+        handle: [project.validateUser, project.removeProject]
     },
     {
-        "method":"DELETE",
-        "path":"/project/quit",
+        "method": "DELETE",
+        "path": "/project/quit",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.quit]
+        user: 1,
+        handle: [project.inProject, project.quit]
     },
     {
-        "method":"PUT",
-        "path":"/project/addurl",
+        "method": "PUT",
+        "path": "/project/addurl",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            url:{
-                type:String,
+            url: {
+                type: String,
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.addUrl]
+        user: 1,
+        handle: [project.inProject, project.addUrl]
     },
     {
-        "method":"GET",
-        "path":"/project/exportjson",
+        "method": "GET",
+        "path": "/project/exportjson",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            version:{
-                type:String,
-                optional:1
+            version: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.exportJSON]
+        user: 1,
+        handle: [project.inProject, project.exportJSON]
     },
     {
-        "method":"GET",
-        "path":"/project/exporthtml",
+        "method": "GET",
+        "path": "/project/exporthtml",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            version:{
-                type:String,
-                optional:1
+            version: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.exportHTML]
+        user: 1,
+        handle: [project.inProject, project.exportHTML]
     },
     {
-        "method":"POST",
-        "path":"/project/importjson",
+        "method": "POST",
+        "path": "/project/importjson",
         "param": {
-            json:{
-                type:String
+            json: {
+                type: String
             },
-            team:{
-                type:String,
-                optional:1
+            team: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.importJSON]
+        user: 1,
+        handle: [project.importJSON]
     },
     {
-        "method":"PUT",
-        "path":"/project/inject",
+        "method": "PUT",
+        "path": "/project/inject",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            before:{
-                type:String,
-                optional:1
+            before: {
+                type: String,
+                optional: 1
             },
-            after:{
-                type:String,
-                optional:1
+            after: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.setInject]
+        user: 1,
+        handle: [project.inProject, project.setInject]
     },
     {
-        "method":"GET",
-        "path":"/project/urllist",
+        "method": "GET",
+        "path": "/project/urllist",
         "param": {
-            id:String
+            id: String
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.urlList]
+        user: 1,
+        handle: [project.inProject, project.urlList]
     },
     {
-        "method":"GET",
-        "path":"/project/importmember",
+        "method": "GET",
+        "path": "/project/importmember",
         "param": {
-            id:String
+            id: String
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.getImportMember]
+        user: 1,
+        handle: [project.inProject, project.getImportMember]
     },
     {
-        "method":"POST",
-        "path":"/project/importmember",
+        "method": "POST",
+        "path": "/project/importmember",
         "param": {
-            id:String,
-            data:String
+            id: String,
+            data: String
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.importMember]
+        user: 1,
+        handle: [project.inProject, project.importMember]
     },
     {
-        "method":"PUT",
-        "path":"/project/owner",
+        "method": "PUT",
+        "path": "/project/owner",
         "param": {
-            id:String,
-            user:String
+            id: String,
+            user: String
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.validateUser,project.setOwner]
+        user: 1,
+        handle: [project.validateUser, project.setOwner]
     },
     {
-        "method":"GET",
-        "path":"/project/applylist",
+        "method": "GET",
+        "path": "/project/applylist",
         "param": {
-            id:String,
+            id: String,
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.validateUser,project.applyList]
+        user: 1,
+        handle: [project.validateUser, project.applyList]
     },
     {
-        "method":"PUT",
-        "path":"/project/handleapply",
+        "method": "PUT",
+        "path": "/project/handleapply",
         "param": {
-            id:String,
-            apply:String,
-            state:{
-                type:Number,
-                in:[1,2]
+            id: String,
+            apply: String,
+            state: {
+                type: Number,
+                in: [1, 2]
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.validateUser,project.handleApply]
+        user: 1,
+        handle: [project.validateUser, project.handleApply]
     },
     {
-        "method":"PUT",
-        "path":"/project/user",
+        "method": "PUT",
+        "path": "/project/user",
         "param": {
-            id:String,
-            user:String
+            id: String,
+            user: String
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.validateUser,project.setUser]
+        user: 1,
+        handle: [project.validateUser, project.setUser]
     },
     {
-        "method":"GET",
-        "path":"/project/users",
+        "method": "GET",
+        "path": "/project/users",
         "param": {
-            id:String,
+            id: String,
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.getUsers]
+        user: 1,
+        handle: [project.inProject, project.getUsers]
     },
     {
-        "method":"POST",
-        "path":"/project/importrap",
+        "method": "POST",
+        "path": "/project/importrap",
         "param": {
-            json:{
-                type:String
+            json: {
+                type: String
             },
-            team:{
-                type:String,
-                optional:1
+            team: {
+                type: String,
+                optional: 1
             },
-            bodytype:{
-                type:Number     //0 urlencoded  1  json
+            bodytype: {
+                type: Number     //0 urlencoded  1  json
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.importRap]
+        user: 1,
+        handle: [project.importRap]
     },
     {
-        "method":"POST",
-        "path":"/project/importswagger",
+        "method": "POST",
+        "path": "/project/importswagger",
         "param": {
-            json:{
-                type:String,
-                optional:1
+            json: {
+                type: String,
+                optional: 1
             },
-            team:{
-                type:String,
-                optional:1
+            team: {
+                type: String,
+                optional: 1
             },
-            url:{
-                type:String,
-                optional:1
+            url: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.importSwagger]
+        user: 1,
+        handle: [project.importSwagger]
     },
     {
-        "method":"PUT",
-        "path":"/project/updateswagger",
+        "method": "PUT",
+        "path": "/project/updateswagger",
         "param": {
-            id:String,
-            json:{
-                type:String,
-                optional:1
+            id: String,
+            json: {
+                type: String,
+                optional: 1
             },
-            url:{
-                type:String,
-                optional:1
+            url: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.validateUser,project.updateSwagger]
+        user: 1,
+        handle: [project.validateUser, project.updateSwagger]
     },
     // sync
     {
@@ -516,51 +515,55 @@ var interface=[
             url: {
                 type: String,
                 optional: 1
+            },
+            new: {
+                type: Number,
+                optional: 1
             }
         },
         "data": {
         },
         user: 1,
-        handle: [project.syncSwagger]
+        handle: [sync.syncSwagger]
     },
     {
-        "method":"POST",
-        "path":"/project/importpostman",
+        "method": "POST",
+        "path": "/project/importpostman",
         "param": {
-            json:{
-                type:String
+            json: {
+                type: String
             },
-            team:{
-                type:String,
-                optional:1
+            team: {
+                type: String,
+                optional: 1
             },
-            baseurl:String,
-            ignore:Number
+            baseurl: String,
+            ignore: Number
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.importPostman]
+        user: 1,
+        handle: [project.importPostman]
     },
     {
-        "method":"GET",
-        "path":"/project/exportdocx",
+        "method": "GET",
+        "path": "/project/exportdocx",
         "param": {
-            id:{
-                type:String
+            id: {
+                type: String
             },
-            version:{
-                type:String,
-                optional:1
+            version: {
+                type: String,
+                optional: 1
             }
         },
-        "data":{
+        "data": {
 
         },
-        user:1,
-        handle:[project.inProject,project.exportDocx]
+        user: 1,
+        handle: [project.inProject, project.exportDocx]
     },
 ];
 
-module.exports=interface;
+module.exports = interface;
