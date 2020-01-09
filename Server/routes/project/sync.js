@@ -172,33 +172,34 @@ function Sync() {
                         jsonType: 0
                     };
 
-                    let contentType = interface.consumes ? interface.consumes[0] : null;
-                    if (!contentType) {
-                        if (interface.parameters) {
-                            for (let obj of interface.parameters) {
-                                if (obj.in == "body" && obj.schema) {
-                                    contentType = "application/json";
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    // let contentType = interface.consumes ? interface.consumes[0] : null;
+                    // if (!contentType) {
+                    //     if (interface.parameters) {
+                    //         for (let obj of interface.parameters) {
+                    //             if (obj.in == "body" && obj.schema) {
+                    //                 contentType = "application/json";
+                    //                 break;
+                    //             }
+                    //         }
+                    //     }
+                    // }
 
-                    if (contentType) {
-                        header.push({ name: "Content-Type", value: contentType, remark: "" });
-                        if (contentType == "application/json") {
-                            bodyInfo = {
-                                type: 1,
-                                rawType: 2,
-                                rawTextRemark: "",
-                                rawFileRemark: "",
-                                rawText: "",
-                                rawJSON: [{ name: "", must: 1, type: 0, remark: "", show: 1, mock: "", drag: 1 }],
-                                rawJSONType: 0
-                            };
-                        }
-                    }
+                    // if (contentType) {
+                    //     header.push({ name: "Content-Type", value: contentType, remark: "" });
+                    //     if (contentType == "application/json") {
+                    //         bodyInfo = {
+                    //             type: 1,
+                    //             rawType: 2,
+                    //             rawTextRemark: "",
+                    //             rawFileRemark: "",
+                    //             rawText: "",
+                    //             rawJSON: [{ name: "", must: 1, type: 0, remark: "", show: 1, mock: "", drag: 1 }],
+                    //             rawJSONType: 0
+                    //         };
+                    //     }
+                    // }
 
+                    // 接口参数
                     if (interface.parameters) {
                         for (let o of interface.parameters) {
                             if (o.in == "path") {
@@ -225,63 +226,228 @@ function Sync() {
                             }
                         }
                     }
-                    if (interface.requestBody) {
-                        // TODO
-                        if (o.in == "body") {
-                            if (bodyInfo.type == 0) {
-                                body.push({
-                                    name: o.name,
-                                    type: 0,
-                                    must: o.required ? 1 : 0,
-                                    remark: o.description ? o.description : "",
-                                    value: { "status": "", "data": [{ value: o.example, remark: "" }], "type": 0 }
-                                });
+
+                    // 接口请求体
+                    if (interface.requestBody && interface.requestBody.content) {
+                        var content = interface.requestBody.content;
+                        for (let media in content) {
+                            var mt = content[media];
+                            if (!mt.schema && mt.schema.type != 'object') { continue; }
+                            var arr_must = mt.schema.required;
+                            var pro = mt.schema.properties;
+                            if (media == "application/x-www-form-urlencoded" || media == "multipart/form-data" || media == "application/json") {
+                                bodyInfo.type = 0
+                                for (let p in pro) {
+                                    body.push({
+                                        name: p,
+                                        type: 0,
+                                        must: (arr_must && arr_must.indexOf(p) > -1) ? 1 : 0,
+                                        remark: pro[p].description ? pro[p].description : "",
+                                        value: { "status": "", "data": [{ value: pro[p].example, remark: "" }], "type": 0 }
+                                    });
+                                }
+                            } else {
+                                bodyInfo.type = 1;
+                                // bodyInfo.type = 1;
+                                // bodyInfo.rawType = 2;
+                                // let objBody = {
+                                //     mock: "",
+                                //     remark: o.description,
+                                //     type: 1,
+                                //     must: o.required ? 1 : 0,
+                                //     name: o.name
+                                // };
+                                // if (o.schema) {
+                                //     if (o.schema.$ref) {
+                                //         let key = o.schema.$ref.substr(14);
+                                //         if (objDef[key]) {
+                                //             let o1 = util.clone(objDef[key]);
+                                //             o1.remark = objBody.remark;
+                                //             o1.must = objBody.must;
+                                //             o1.name = objBody.name;
+                                //             objBody = o1;
+                                //             if (bodyInfo.rawJSON[0].name) {
+                                //                 bodyInfo.rawJSON.push(objBody);
+                                //             }
+                                //             else {
+                                //                 bodyInfo.rawJSON[0] = objBody;
+                                //             }
+                                //         }
+                                //     }
+                                //     else {
+                                //         if (o.schema.items) {
+                                //             objBody.data = [];
+                                //             objBody.type = 3;
+                                //             if (o.schema.items.$ref) {
+                                //                 let key = o.schema.items.$ref.substr(14);
+                                //                 if (objDef[key]) {
+                                //                     let o1 = util.clone(objDef[key]);
+                                //                     objBody.data.push(o1);
+                                //                     if (bodyInfo.rawJSON[0].name) {
+                                //                         bodyInfo.rawJSON.push(objBody);
+                                //                     }
+                                //                     else {
+                                //                         bodyInfo.rawJSON[0] = objBody;
+                                //                     }
+                                //                 }
+                                //             }
+                                //             else {
+                                //                 let type;
+                                //                 let o1 = o.schema.items;
+                                //                 if (o1.type == "string" || o1.type == "byte" || o1.type == "binary" || o1.type == "date" || o1.type == "dateTime" || o1.type == "password") {
+                                //                     type = 0;
+                                //                 }
+                                //                 else if (o1.type == "integer" || o1.type == "long" || o1.type == "float" || o1.type == "double") {
+                                //                     type = 1;
+                                //                 }
+                                //                 else if (o1.type == "boolean") {
+                                //                     type = 2;
+                                //                 }
+                                //                 let o2 = {
+                                //                     mock: o1.default !== undefined ? o1.default : "",
+                                //                     remark: o1.description ? o1.description : "",
+                                //                     type: type,
+                                //                     must: 1,
+                                //                     name: null
+                                //                 }
+                                //                 objBody.data.push(o2);
+                                //                 if (bodyInfo.rawJSON[0].name) {
+                                //                     bodyInfo.rawJSON.push(objBody);
+                                //                 }
+                                //                 else {
+                                //                     bodyInfo.rawJSON[0] = objBody;
+                                //                 }
+                                //             }
+                                //         }
+                                //         else if (o.schema.type == "cust" && o.schema.format == "json") {
+                                //             objBody.data = [];
+                                //             objBody.type = 3;
+                                //             let objJSON;
+                                //             try {
+                                //                 objJSON = JSON.parse(o.schema.content);
+                                //             }
+                                //             catch (err) {
+                                //                 continue;
+                                //             }
+                                //             let result = [];
+                                //             for (let key in objJSON) {
+                                //                 util.handleResultData(key, objJSON[key], result, null, 1, 1)
+                                //             }
+                                //             objBody.data = result;
+                                //             if (bodyInfo.rawJSON[0].name) {
+                                //                 bodyInfo.rawJSON.push(objBody);
+                                //             }
+                                //             else {
+                                //                 bodyInfo.rawJSON[0] = objBody;
+                                //             }
+                                //         }
+                                //     }
+                                // }
                             }
-                            else if (bodyInfo.type == 1 && bodyInfo.rawType == 2) {
-                                let objBody = {
-                                    mock: "",
-                                    remark: o.description,
-                                    type: 1,
-                                    must: o.required ? 1 : 0,
-                                    name: o.name
-                                };
-                                if (o.schema) {
-                                    if (o.schema.$ref) {
-                                        let key = o.schema.$ref.substr(14);
-                                        if (objDef[key]) {
-                                            let o1 = util.clone(objDef[key]);
-                                            o1.remark = objBody.remark;
-                                            o1.must = objBody.must;
-                                            o1.name = objBody.name;
-                                            objBody = o1;
-                                            if (bodyInfo.rawJSON[0].name) {
-                                                bodyInfo.rawJSON.push(objBody);
+                        }
+                    }
+
+                    // 参数组信息
+                    let objDef = {};
+                    if (interface.responses) {
+                        if (Object.keys(interface.responses).length === 0) {
+                            interface.responses['default'] = "";
+                        } else {
+                            let count = 0;
+                            for (let status in interface.responses) {
+                                let result = [];
+                                let ro = interface.responses[status];
+                                if (ro && ro.content) {
+                                    for (let media in ro.content) {
+                                        let objRes = ro.content[media];
+                                        count++;
+                                        if (objRes.example) {
+                                            let result1 = [];
+                                            for (let key in objRes.example) {
+                                                util.handleResultData(key, objRes.example[key], result1, null, 1)
                                             }
-                                            else {
-                                                bodyInfo.rawJSON[0] = objBody;
-                                            }
+                                            result = result1;
                                         }
-                                    }
-                                    else {
-                                        if (o.schema.items) {
-                                            objBody.data = [];
-                                            objBody.type = 3;
-                                            if (o.schema.items.$ref) {
-                                                let key = o.schema.items.$ref.substr(14);
-                                                if (objDef[key]) {
-                                                    let o1 = util.clone(objDef[key]);
-                                                    objBody.data.push(o1);
-                                                    if (bodyInfo.rawJSON[0].name) {
-                                                        bodyInfo.rawJSON.push(objBody);
+                                        else if (objRes.schema && objRes.schema.properties) {
+                                            var arr_must = objRes.schema.required;
+                                            function __handleRes(key, value, data, must) {
+                                                // 0 String,1 Number,2 Boolean,3 Array,4 Object,5 Mixed
+                                                let obj = {
+                                                    name: key ? key : null,
+                                                    type: 0,
+                                                    remark: value.description ? value.description.toString() : "",
+                                                    must: must,
+                                                    mock: value.example ? value.example.toString() : "",
+                                                }
+                                                if (value.example !== null && value.example !== undefined) {
+                                                    if ((typeof value.example == 'string') && value.example.constructor == String) {
+                                                        obj.type = 0;
+                                                    }
+                                                    else if ((typeof value.example == 'number') && value.example.constructor == Number) {
+                                                        obj.type = 1;
+                                                    }
+                                                    else if ((typeof value.example == 'boolean') && value.example.constructor == Boolean) {
+                                                        obj.type = 2;
+                                                        obj.mock = value.example ? 'true' : 'false';
+                                                    }
+                                                    else if ((typeof value.example == 'object') && value.example.constructor == Array) {
+                                                        obj.type = 3;
+                                                        obj.mock = "";
+                                                        let obj_sub = {
+                                                            name: null,
+                                                            type: 4,
+                                                            remark: value.description ? value.description : "",
+                                                            must: must,
+                                                            mock: "",
+                                                            data: []
+                                                        }
+                                                        for (let inx in value.example[0]) {
+                                                            var must = (value.example[0][inx]['required']) ? 1 : 0;
+                                                            __handleRes(inx, value.example[0][inx], obj_sub.data, must);
+                                                        }
+                                                        obj.data = [obj_sub];
+                                                    }
+                                                    else if ((typeof value.example == 'object') && value.example.constructor == Object) {
+                                                        obj.type = 4;
+                                                        obj.mock = "";
+                                                        obj.data = [];
+                                                        for (let inx in value.example) {
+                                                            var must = (value.example[inx]['required']) ? 1 : 0;
+                                                            __handleRes(inx, value.example[inx], obj.data, must);
+                                                        }
                                                     }
                                                     else {
-                                                        bodyInfo.rawJSON[0] = objBody;
+                                                        obj.type = 5;
+                                                    }
+                                                }
+                                                data.push(obj);
+                                            }
+                                            for (let key in objRes.schema.properties) {
+                                                var must = (arr_must && arr_must.indexOf(key) > -1) ? 1 : 0;
+                                                __handleRes(key, objRes.schema.properties[key], result, must);
+                                            }
+                                        }
+                                        else if (objRes.schema && objRes.schema.items) {
+                                            outInfo.jsonType = 1;
+                                            result = [{ name: null, must: 1, type: 0, remark: "", mock: "", }]
+                                            if (objRes.schema.items.$ref) {
+                                                let key = objRes.schema.items.$ref.substr(14);
+                                                if (objDef[key]) {
+                                                    let o1 = util.clone(objDef[key]);
+                                                    if (o1.type == 4) {
+                                                        result[0].type = 4;
+                                                        result[0].data = o1.data;
+                                                    }
+                                                    else {
+                                                        for (let key in o1) {
+                                                            result[0][key] = o1[key];
+                                                        }
                                                     }
                                                 }
                                             }
                                             else {
                                                 let type;
-                                                let o1 = o.schema.items;
+                                                let o1 = objRes.schema.items;
                                                 if (o1.type == "string" || o1.type == "byte" || o1.type == "binary" || o1.type == "date" || o1.type == "dateTime" || o1.type == "password") {
                                                     type = 0;
                                                 }
@@ -291,225 +457,43 @@ function Sync() {
                                                 else if (o1.type == "boolean") {
                                                     type = 2;
                                                 }
-                                                let o2 = {
-                                                    mock: o1.default !== undefined ? o1.default : "",
-                                                    remark: o1.description ? o1.description : "",
-                                                    type: type,
-                                                    must: 1,
-                                                    name: null
-                                                }
-                                                objBody.data.push(o2);
-                                                if (bodyInfo.rawJSON[0].name) {
-                                                    bodyInfo.rawJSON.push(objBody);
-                                                }
-                                                else {
-                                                    bodyInfo.rawJSON[0] = objBody;
-                                                }
+                                                result[0].type = type;
                                             }
                                         }
-                                        else if (o.schema.type == "cust" && o.schema.format == "json") {
-                                            objBody.data = [];
-                                            objBody.type = 3;
-                                            let objJSON;
-                                            try {
-                                                objJSON = JSON.parse(o.schema.content);
-                                            }
-                                            catch (err) {
-                                                continue;
-                                            }
-                                            let result = [];
-                                            for (let key in objJSON) {
-                                                util.handleResultData(key, objJSON[key], result, null, 1, 1)
-                                            }
-                                            objBody.data = result;
-                                            if (bodyInfo.rawJSON[0].name) {
-                                                bodyInfo.rawJSON.push(objBody);
+                                        else {
+                                            outInfo.type = 1;
+                                            if (objRes.schema) {
+                                                outInfo.rawRemark = objRes.description + "(" + (objRes.schema.type ? objRes.schema.type : "") + ")";
                                             }
                                             else {
-                                                bodyInfo.rawJSON[0] = objBody;
+                                                outInfo.rawRemark = ""
                                             }
                                         }
                                     }
-                                }
-                            }
-                        }
 
-                    }
-
-                    // 参数组信息
-                    if (interface.responses) {
-                        if (Object.keys(interface.responses).length === 0) {
-                            interface.responses['default'] = "";
-                        }
-                        let count = 0;
-                        for (let status in interface.responses) {
-                            count++;
-                            let result = [];
-                            let objRes = interface.responses[status];
-                            if (objRes.schema && objRes.schema.$ref) {
-                                let key = objRes.schema.$ref.substr(14);
-                                if (objDef[key]) {
-                                    let o1 = util.clone(objDef[key]);
-                                    if (o1.type == 4) {
-                                        result = o1.data;
+                                    let objParam = {
+                                        id: uuid(),
+                                        name: ro.description ? ro.description : "参数",
+                                        remark: status && status != "default" ? "HTTP状态码:" + status : "",
+                                        before: { code: "", mode: 0 },
+                                        after: { code: "", mode: 0 }
+                                    };
+                                    objParam.queryParam = query;
+                                    objParam.header = header;
+                                    objParam.restParam = rest;
+                                    objParam.outParam = result;
+                                    objParam.outInfo = outInfo;
+                                    if (update.method == "POST" || update.method == "PUT" || update.method == "PATCH") {
+                                        objParam.bodyParam = body;
+                                        objParam.bodyInfo = bodyInfo;
+                                    }
+                                    if (count == 1) {
+                                        update.param[0] = util.clone(objParam)
                                     }
                                     else {
-                                        outInfo.type = 1;
-                                        outInfo.rawMock = o1.mock ? o1.mock : "";
-                                        outInfo.rawRemark = objRes.description ? objRes.description : "";
+                                        update.param.push(util.clone(objParam))
                                     }
                                 }
-                            }
-                            else if (objRes.schema && objRes.schema.items) {
-                                outInfo.jsonType = 1;
-                                result = [{ name: null, must: 1, type: 0, remark: "", mock: "", }]
-                                if (objRes.schema.items.$ref) {
-                                    let key = objRes.schema.items.$ref.substr(14);
-                                    if (objDef[key]) {
-                                        let o1 = util.clone(objDef[key]);
-                                        if (o1.type == 4) {
-                                            result[0].type = 4;
-                                            result[0].data = o1.data;
-                                        }
-                                        else {
-                                            for (let key in o1) {
-                                                result[0][key] = o1[key];
-                                            }
-                                        }
-                                    }
-                                }
-                                else {
-                                    let type;
-                                    let o1 = objRes.schema.items;
-                                    if (o1.type == "string" || o1.type == "byte" || o1.type == "binary" || o1.type == "date" || o1.type == "dateTime" || o1.type == "password") {
-                                        type = 0;
-                                    }
-                                    else if (o1.type == "integer" || o1.type == "long" || o1.type == "float" || o1.type == "double") {
-                                        type = 1;
-                                    }
-                                    else if (o1.type == "boolean") {
-                                        type = 2;
-                                    }
-                                    result[0].type = type;
-                                }
-                            }
-                            else if (objRes.schema && objRes.schema.properties) {
-                                function __handleRes(key, value, data) {
-                                    let obj = {
-                                        mock: value.example ? value.example : "",
-                                        remark: value.description ? value.description : "",
-                                        type: 0, must: 1, name: key ? key : null
-                                    }
-                                    if (value.type == "string" || value.type == "byte" || value.type == "binary" || value.type == "date" || value.type == "dateTime" || value.type == "password") {
-                                        obj.type = 0;
-                                    }
-                                    else if (value.type == "integer" || value.type == "long" || value.type == "float" || value.type == "double") {
-                                        obj.type = 1;
-                                    }
-                                    else if (value.type == "boolean") {
-                                        obj.type = 2;
-                                    }
-                                    else if (value.type == "array") {
-                                        obj.type = 3;
-                                        obj.data = [];
-                                        if (value.items.$ref) {
-                                            let result = [{ name: null, must: 1, type: 0, remark: "", mock: "", }]
-                                            let def = value.items.$ref.substr(value.items.$ref.lastIndexOf("/") + 1);
-                                            if (objDef[def]) {
-                                                let o1 = util.clone(objDef[def]);
-                                                if (o1.type == 4) {
-                                                    result[0].type = 4;
-                                                    result[0].data = o1.data;
-                                                }
-                                                else {
-                                                    for (let key in o1) {
-                                                        result[0][key] = o1[key];
-                                                    }
-                                                }
-                                                obj.data = result;
-                                            }
-                                        }
-                                        else {
-                                            let type;
-                                            let o1 = value.items;
-                                            arguments.callee(null, o1, obj.data);
-                                        }
-                                    }
-                                    else if (value.type == "object") {
-                                        obj.type = 4;
-                                        obj.data = [];
-                                        for (let k in value.properties) {
-                                            arguments.callee(k, value.properties[k], obj.data);
-                                        }
-                                    }
-                                    else if (value.$ref) {
-                                        let ref = value.$ref.substr(value.$ref.lastIndexOf("/") + 1);
-                                        if (objDef[ref]) {
-                                            let o1 = util.clone(objDef[ref]);
-                                            if (o1.type == 4) {
-                                                obj.type = 4;
-                                                obj.data = o1.data;
-                                            }
-                                            else {
-                                                for (let key in o1) {
-                                                    obj[key] = o1[key];
-                                                }
-                                            }
-                                        }
-                                    }
-                                    data.push(obj);
-                                }
-                                for (let key in objRes.schema.properties) {
-                                    __handleRes(key, objRes.schema.properties[key], result);
-                                }
-                            }
-                            else if (objRes.schema && objRes.schema.type == "cust" && objRes.schema.format == "json") {
-                                let objJSON;
-                                try {
-                                    objJSON = JSON.parse(objRes.schema.content);
-                                }
-                                catch (err) {
-
-                                }
-                                if (objJSON) {
-                                    let result1 = [];
-                                    for (let key in objJSON) {
-                                        util.handleResultData(key, objJSON[key], result1, null, 1)
-                                    }
-                                    result = result1;
-                                }
-                            }
-                            else {
-                                outInfo.type = 1;
-                                if (objRes.schema) {
-                                    outInfo.rawRemark = objRes.description + "(" + (objRes.schema.type ? objRes.schema.type : "") + ")";
-                                }
-                                else {
-                                    outInfo.rawRemark = ""
-                                }
-                            }
-
-                            let objParam = {
-                                id: uuid(),
-                                name: objRes.description ? objRes.description : "参数",
-                                remark: status && status != "default" ? "HTTP状态码:" + status : "",
-                                before: { code: "", mode: 0 },
-                                after: { code: "", mode: 0 }
-                            };
-                            objParam.queryParam = query;
-                            objParam.header = header;
-                            objParam.restParam = rest;
-                            objParam.outParam = result;
-                            objParam.outInfo = outInfo;
-                            if (update.method == "POST" || update.method == "PUT" || update.method == "PATCH") {
-                                objParam.bodyParam = body;
-                                objParam.bodyInfo = bodyInfo;
-                            }
-                            if (count == 1) {
-                                update.param[0] = util.clone(objParam)
-                            }
-                            else {
-                                update.param.push(util.clone(objParam))
                             }
                         }
                     }
@@ -527,120 +511,107 @@ function Sync() {
             util.ok(res, "同步成功");
             return;
 
-
-            let objDef = {};
-            function handleDef(def, root, arrDef) {
-                let ref = false, obj, key;
-                if (def.$ref) {
-                    ref = true;
-                    key = def.$ref.substr(14);
-                    if (objDef[key]) {
-                        if (arrDef.indexOf(key) > -1) {
-                            return null;
-                        }
-                        else {
-                            return objDef[key];
-                        }
-                    }
-                    else {
-                        if (arrDef.indexOf(key) > -1) {
-                            return null;
-                        }
-                        arrDef.push(key);
-                        obj = root[key];
-                    }
-                }
-                else {
-                    obj = def;
-                }
-                if (!obj) {
-                    return null;
-                }
-                let objRaw = {
-                    mock: "",
-                    remark: "",
-                    type: 0,
-                    must: 1,
-                    name: null
-                };
-                if (obj.type == "string" || obj.type == "byte" || obj.type == "binary" || obj.type == "date" || obj.type == "dateTime" || obj.type == "password") {
-                    objRaw.type = 0;
-                }
-                else if (obj.type == "integer" || obj.type == "long" || obj.type == "float" || obj.type == "double") {
-                    objRaw.type = 1;
-                }
-                else if (obj.type == "boolean") {
-                    objRaw.type = 2;
-                }
-                else if (obj.type == "array") {
-                    objRaw.type = 3;
-                    objRaw.data = [];
-                    let index = arrDef.length;
-                    let obj1 = arguments.callee(obj.items, root, arrDef);
-                    arrDef.splice(index);
-                    if (obj1 !== null) {
-                        obj1 = util.clone(obj1);
-                        objRaw.data.push(obj1);
-                    }
-                }
-                else if (obj.type == "object" || obj.type === undefined) {
-                    objRaw.type = 4;
-                    objRaw.data = [];
-                    for (let key in obj.properties) {
-                        let index = arrDef.length;
-                        let obj1 = arguments.callee(obj.properties[key], root, arrDef);
-                        arrDef.splice(index);
-                        if (obj1 !== null) {
-                            obj1 = util.clone(obj1);
-                            obj1.name = key;
-                            objRaw.data.push(obj1);
-                        }
-                    }
-                }
-                if (obj.description) {
-                    objRaw.remark = obj.description;
-                }
-                if (obj.default !== undefined) {
-                    objRaw.mock = obj.default;
-                }
-                if (obj.example !== undefined || obj.enum !== undefined) {
-                    objRaw.value = {
-                        type: 0,
-                        status: "",
-                        data: []
-                    };
-                    if (obj.example !== undefined) {
-                        objRaw.value.data.push({
-                            value: obj.example,
-                            remark: ""
-                        })
-                    }
-                    if (obj.enum !== undefined) {
-                        objRaw.value.data = objRaw.value.data.concat(obj.enum.map(function (obj) {
-                            return {
-                                value: obj,
-                                remark: ""
-                            }
-                        }));
-                    }
-                }
-                if (def.$ref) {
-                    objDef[key] = objRaw;
-                }
-                return objRaw;
-            }
-            if (obj.definitions) {
-                for (let key in obj.definitions) {
-                    let val = obj.definitions[key];
-                    let arrDef = [key];
-                    let o = handleDef(val, obj.definitions, arrDef);
-                    objDef[key] = o;
-                }
-            }
-
-
-
-            util.ok(res, "同步成功");
+            // DELETE
+            // let objDef = {};
+            // function handleDef(def, root, arrDef) {
+            //     let ref = false, obj, key;
+            //     if (def.$ref) {
+            //         ref = true;
+            //         key = def.$ref.substr(14);
+            //         if (objDef[key]) {
+            //             if (arrDef.indexOf(key) > -1) {
+            //                 return null;
+            //             }
+            //             else {
+            //                 return objDef[key];
+            //             }
+            //         }
+            //         else {
+            //             if (arrDef.indexOf(key) > -1) {
+            //                 return null;
+            //             }
+            //             arrDef.push(key);
+            //             obj = root[key];
+            //         }
+            //     }
+            //     else { obj = def; }
+            //     if (!obj) { return null; }
+            //     let objRaw = { mock: "", remark: "", type: 0, must: 1, name: null };
+            //     if (obj.type == "string" || obj.type == "byte" || obj.type == "binary" || obj.type == "date" || obj.type == "dateTime" || obj.type == "password") {
+            //         objRaw.type = 0;
+            //     }
+            //     else if (obj.type == "integer" || obj.type == "long" || obj.type == "float" || obj.type == "double") {
+            //         objRaw.type = 1;
+            //     }
+            //     else if (obj.type == "boolean") {
+            //         objRaw.type = 2;
+            //     }
+            //     else if (obj.type == "array") {
+            //         objRaw.type = 3;
+            //         objRaw.data = [];
+            //         let index = arrDef.length;
+            //         let obj1 = arguments.callee(obj.items, root, arrDef);
+            //         arrDef.splice(index);
+            //         if (obj1 !== null) {
+            //             obj1 = util.clone(obj1);
+            //             objRaw.data.push(obj1);
+            //         }
+            //     }
+            //     else if (obj.type == "object" || obj.type === undefined) {
+            //         objRaw.type = 4;
+            //         objRaw.data = [];
+            //         for (let key in obj.properties) {
+            //             let index = arrDef.length;
+            //             let obj1 = arguments.callee(obj.properties[key], root, arrDef);
+            //             arrDef.splice(index);
+            //             if (obj1 !== null) {
+            //                 obj1 = util.clone(obj1);
+            //                 obj1.name = key;
+            //                 objRaw.data.push(obj1);
+            //             }
+            //         }
+            //     }
+            //     if (obj.description) {
+            //         objRaw.remark = obj.description;
+            //     }
+            //     if (obj.default !== undefined) {
+            //         objRaw.mock = obj.default;
+            //     }
+            //     if (obj.example !== undefined || obj.enum !== undefined) {
+            //         objRaw.value = {
+            //             type: 0,
+            //             status: "",
+            //             data: []
+            //         };
+            //         if (obj.example !== undefined) {
+            //             objRaw.value.data.push({
+            //                 value: obj.example,
+            //                 remark: ""
+            //             })
+            //         }
+            //         if (obj.enum !== undefined) {
+            //             objRaw.value.data = objRaw.value.data.concat(obj.enum.map(function (obj) {
+            //                 return {
+            //                     value: obj,
+            //                     remark: ""
+            //                 }
+            //             }));
+            //         }
+            //     }
+            //     if (def.$ref) {
+            //         objDef[key] = objRaw;
+            //     }
+            //     return objRaw;
+            // }
+            // if (obj.definitions) {
+            //     for (let key in obj.definitions) {
+            //         let val = obj.definitions[key];
+            //         let arrDef = [key];
+            //         let o = handleDef(val, obj.definitions, arrDef);
+            //         objDef[key] = o;
+            //     }
+            // }
+            // DELETE
         }
         catch (err) {
             util.catch(res, err);
