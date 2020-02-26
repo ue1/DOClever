@@ -84,10 +84,10 @@ function Sync() {
                     // 接口名称
                     let name;
                     if (interface.summary) {
-                        name = interface.summary + ' ' + path
+                        name = interface.summary;
                     }
                     else if (interface.description) {
-                        name = interface.description + ' ' + path
+                        name = interface.description;
                     }
                     else {
                         name = path;
