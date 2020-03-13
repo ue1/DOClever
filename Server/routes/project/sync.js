@@ -393,19 +393,10 @@ function Sync() {
                                                     else if ((typeof value.example == 'object') && value.example.constructor == Array) {
                                                         obj.type = 3;
                                                         obj.mock = "";
-                                                        let obj_sub = {
-                                                            name: null,
-                                                            type: 4,
-                                                            remark: value.description ? value.description : "",
-                                                            must: must,
-                                                            mock: "",
-                                                            data: []
+                                                        obj.data = [];
+                                                        if (value.example.length > 0) {
+                                                            obj.mock = value.example[0];
                                                         }
-                                                        for (let inx in value.example[0]) {
-                                                            var must = (value.example[0][inx]['required']) ? 1 : 0;
-                                                            __handleRes(inx, value.example[0][inx], obj_sub.data, must);
-                                                        }
-                                                        obj.data = [obj_sub];
                                                     }
                                                     else if ((typeof value.example == 'object') && value.example.constructor == Object) {
                                                         obj.type = 4;
