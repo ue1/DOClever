@@ -395,7 +395,23 @@ function Sync() {
                                                         obj.mock = "";
                                                         obj.data = [];
                                                         if (value.example.length > 0) {
-                                                            obj.mock = value.example[0];
+                                                            if ((typeof value.example[0] == 'object') && value.example[0].constructor == Object) {
+                                                                let obj_sub = {
+                                                                    name: null,
+                                                                    type: 4,
+                                                                    remark: value.description ? value.description : "",
+                                                                    must: must,
+                                                                    mock: "",
+                                                                    data: []
+                                                                }
+                                                                for (let inx in value.example[0]) {
+                                                                    var must = (value.example[0][inx]['required']) ? 1 : 0;
+                                                                    __handleRes(inx, value.example[0][inx], obj_sub.data, must);
+                                                                }
+                                                                obj.data = [obj_sub];
+                                                            } else {
+                                                                obj.mock = value.example[0];
+                                                            }
                                                         }
                                                     }
                                                     else if ((typeof value.example == 'object') && value.example.constructor == Object) {
